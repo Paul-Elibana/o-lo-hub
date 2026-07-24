@@ -1,0 +1,118 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    @apply bg-slate-900 text-slate-100 font-sans antialiased selection:bg-emerald-700 selection:text-white;
+    background-color: #0f172a;
+    background-image: 
+      radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.05) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(13, 148, 136, 0.05) 0px, transparent 50%);
+    background-attachment: fixed;
+  }
+}
+
+/* Eye-Friendly Muted Dark Cards */
+.glass-card {
+  background: rgba(30, 41, 59, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid #334155;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+  will-change: transform, box-shadow, border-color;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translateZ(0);
+}
+
+.glass-card-hover:hover {
+  transform: translate3d(0, -4px, 0);
+  border-color: #059669;
+  box-shadow: 0 16px 32px -8px rgba(5, 150, 105, 0.25);
+}
+
+/* Fluid Button Hover Animations */
+button, a {
+  will-change: transform, opacity;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Anime-Sama Hero Inspired Animations */
+@keyframes kenburnsZoom {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.animate-kenburns {
+  animation: kenburnsZoom 16s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+@keyframes animeSamaHeroFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(24px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.hero-animate-in {
+  animation: animeSamaHeroFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+@keyframes heroGlowPulse {
+  0%, 100% {
+    opacity: 0.6;
+    filter: drop-shadow(0 0 12px rgba(16, 185, 129, 0.4));
+  }
+  50% {
+    opacity: 1;
+    filter: drop-shadow(0 0 24px rgba(16, 185, 129, 0.8));
+  }
+}
+
+.hero-glow-accent {
+  animation: heroGlowPulse 4s ease-in-out infinite;
+}
+
+@keyframes splashProgress {
+  0% {
+    width: 0%;
+    margin-left: 0%;
+  }
+  50% {
+    width: 75%;
+    margin-left: 12.5%;
+  }
+  100% {
+    width: 100%;
+    margin-left: 0%;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0f172a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #059669;
+}
