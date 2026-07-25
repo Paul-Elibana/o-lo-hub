@@ -1,35 +1,38 @@
 import { NextResponse } from 'next/server';
-import { getTicketByCode, saveTicket } from '@/lib/tickets';
+import { getTicketByCodeAsync, saveTicket } from '@/lib/tickets';
 
 /**
- * Endpoint de Callback / Webhook eBilling DIGITECH
- * eBilling envoie une notification de paiement avec bill_id, client_transaction_id et status.
+ * Endpoint de Callback / Webhook eBilling DIGITECH (Guide v1 - Page 10 & 11)
+ * Paramètres reçus : reference, transactionid, paymentsystem, amount, billingid
  */
 export async function POST(request: Request) {
   try {
     const payload = await request.json().catch(() => null);
 
     if (!payload) {
-      return NextResponse.json({ error: 'Payload vide' }, { status: 400 });
+      return NextResponse.json({ error: 'missing payload' }, { status: 400 });
     }
 
-    const trackingCode = payload.client_transaction_id || payload.external_reference;
-    const status = payload.status || payload.state; // e.g. 'processed', 'paid', 'success'
+    const trackingCode = payload.reference || payload.external_reference || payload.client_transaction_id;
+    const operator = payload.paymentsystem || payload.payment_system || 'Mobile Money (eBilling)';
+    const billingId = payload.billingid || payload.bill_id;
 
     if (trackingCode) {
-      const ticket = getTicketByCode(trackingCode);
+      const ticket = await getTicketByCodeAsync(trackingCode);
       if (ticket) {
-        if (['processed', 'paid', 'success', 'completed'].includes(String(status).toLowerCase())) {
-          ticket.status = 'paid';
-          ticket.progress = Math.max(ticket.progress, 30);
-          ticket.updateText = 'Paiement eBilling (Airtel/Moov Money) validé avec succès. Traitement du dossier en cours.';
-          ticket.paymentMethod = payload.payment_system || 'Mobile Money (eBilling)';
-          saveTicket(ticket);
+        ticket.status = 'paid';
+        ticket.progress = Math.max(ticket.progress, 35);
+        ticket.updateText = `Paiement Mobile Money (${operator === 'moovmoney4' ? 'Moov Money' : 'Airtel Money'}) validé ! Traitement du dossier en cours.`;
+        ticket.paymentMethod = operator === 'moovmoney4' ? 'Moov Money' : 'Airtel Money';
+        if (billingId) {
+          ticket.ebillingBillId = String(billingId);
         }
+        saveTicket(ticket);
       }
     }
 
-    return NextResponse.json({ status: 'OK', message: 'Callback eBilling traité' });
+    // Guide Page 11: Retourner impérativement HTTP 200 avec { success: true }
+    return NextResponse.json({ success: true, message: 'Callback eBilling traite' }, { status: 200 });
   } catch (error) {
     console.error('Callback eBilling error:', error);
     return NextResponse.json({ error: 'Erreur traitement callback' }, { status: 500 });

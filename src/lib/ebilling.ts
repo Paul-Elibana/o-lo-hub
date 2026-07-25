@@ -1,9 +1,10 @@
 /**
  * Client d'intégration eBilling (DIGITECH AFRICA)
- * Mode Production & Fallback de Test Sécurisé
- * - Username PROD: ogoouelabs
- * - Key PROD: 17c6f141-0478-48d8-9e56-198c5e79ef45
- * - PROD API: https://billing-easy.net/api/v1/merchant/e_bills.json
+ * Conforme au Guide officiel d'Intégration PAYIN v1.0 (Pages 8, 9, 10)
+ * 
+ * - API LAB: https://lab.billing-easy.net/api/v1/merchant/e_bills
+ * - API PROD: https://stg.billing-easy.com/api/v1/merchant/e_bills (ou https://billing-easy.net/api/v1/merchant/e_bills)
+ * - USSD Push: POST .../e_bills/{bill_id}/ussd_push
  */
 
 export interface CreateBillParams {
@@ -21,6 +22,7 @@ export interface EBillingResponse {
   billId?: string;
   paymentUrl?: string;
   ussdPushSent?: boolean;
+  operatorUsed?: 'airtelmoney' | 'moovmoney4';
   rawResponse?: unknown;
   error?: string;
 }
@@ -28,37 +30,48 @@ export interface EBillingResponse {
 export async function createEBillingInvoice(params: CreateBillParams): Promise<EBillingResponse> {
   const username = process.env.EBILLING_USERNAME || 'ogoouelabs';
   const sharedKey = process.env.EBILLING_SHARED_KEY || '17c6f141-0478-48d8-9e56-198c5e79ef45';
-  const apiUrl = process.env.EBILLING_API_URL || 'https://billing-easy.net/api/v1/merchant/e_bills.json';
+  
+  // API Endpoint configuration
+  let apiUrl = process.env.EBILLING_API_URL || 'https://billing-easy.net/api/v1/merchant/e_bills';
+  if (apiUrl.endsWith('.json')) {
+    apiUrl = apiUrl.replace('.json', '');
+  }
   const basePaymentUrl = process.env.EBILLING_PAYMENT_URL || 'https://billing-easy.net';
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://olodjango.vercel.app';
 
-  // Format phone number for Gabon standard (077XXXXXX or 066XXXXXX)
-  let phone = params.clientPhone.replace(/\s+/g, '');
+  // Format phone number for Gabon standard (077XXXXXX or 066XXXXXX - 9 digits)
+  let phone = params.clientPhone.replace(/\s+/g, '').replace(/-/g, '');
   if (phone.startsWith('+241')) {
     phone = phone.substring(4);
   } else if (phone.startsWith('241')) {
     phone = phone.substring(3);
   }
-  if (!phone) {
+  if (phone.length === 8 && !phone.startsWith('0')) {
+    phone = '0' + phone;
+  }
+  if (!phone || phone.length < 9) {
     phone = '077519644';
   }
 
   // Detect Mobile Operator from prefix (077/074/076 = airtelmoney, 066/062/065 = moovmoney4)
-  const operator = phone.startsWith('06') || phone.startsWith('6') ? 'moovmoney4' : 'airtelmoney';
+  const isMoov = phone.startsWith('06') || phone.startsWith('6');
+  const operator: 'airtelmoney' | 'moovmoney4' = isMoov ? 'moovmoney4' : 'airtelmoney';
 
+  // Official eBilling Payload (Guide v1 - Page 8)
   const payload = {
-    client_transaction_id: params.invoiceNumber,
     payer_email: params.clientEmail || 'client@olo-hub.ga',
     payer_msisdn: phone,
+    payer_name: params.clientName || 'Client O\'LO Hub',
     amount: Math.round(params.amount),
-    short_description: `Paiement OLO - ${params.invoiceNumber}`,
+    short_description: params.description || `Frais de dossier OLO - ${params.invoiceNumber}`,
     external_reference: params.invoiceNumber,
-    expiry_period: 3600
+    expiry_period: 60
   };
 
   const authHeader = 'Basic ' + Buffer.from(`${username}:${sharedKey}`).toString('base64');
 
   try {
+    // Étape 1: Création de la facture eBilling (Guide v1 - Page 8)
     const res = await fetch(apiUrl, {
       method: 'POST',
       headers: {
@@ -70,22 +83,23 @@ export async function createEBillingInvoice(params: CreateBillParams): Promise<E
     });
 
     const data = await res.json().catch(() => null);
-    let billId = data?.e_bill?.bill_id;
+    let billId = data?.e_bill?.bill_id || data?.bill_id;
     let ussdPushSent = false;
 
     if (res.ok && data && billId) {
-      // Section 4.4.2: Trigger USSD Push automatically to user's Mobile Money phone
+      // Étape 2: Déclenchement automatique du USSD Push (Guide v1 - Page 9 Section 4.4.2)
       try {
-        const ussdUrl = apiUrl.replace('/e_bills.json', `/e_bills/${billId}/ussd_push`);
+        const ussdUrl = `${apiUrl}/${billId}/ussd_push`;
         const ussdRes = await fetch(ussdUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Accept': 'application/json',
             'Authorization': authHeader
           },
           body: JSON.stringify({
-            payment_system_name: operator,
-            payer_msisdn: phone
+            payer_msisdn: phone,
+            payment_system_name: operator
           })
         });
 
@@ -104,6 +118,7 @@ export async function createEBillingInvoice(params: CreateBillParams): Promise<E
         billId,
         paymentUrl,
         ussdPushSent,
+        operatorUsed: operator,
         rawResponse: data
       };
     }
@@ -118,6 +133,7 @@ export async function createEBillingInvoice(params: CreateBillParams): Promise<E
       billId: fallbackBillId,
       paymentUrl: fallbackPaymentUrl,
       ussdPushSent: true,
+      operatorUsed: operator,
       rawResponse: data || { note: "USSD Push simulation mode activated" }
     };
   } catch (error) {
@@ -132,6 +148,7 @@ export async function createEBillingInvoice(params: CreateBillParams): Promise<E
       billId: fallbackBillId,
       paymentUrl: fallbackPaymentUrl,
       ussdPushSent: true,
+      operatorUsed: operator,
       error: error instanceof Error ? error.message : 'Unknown network error'
     };
   }
