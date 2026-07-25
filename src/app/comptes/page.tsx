@@ -26,6 +26,7 @@ export default function ComptesPage() {
   const [userTickets, setUserTickets] = useState<Ticket[]>([]);
   const [zammadTokenInput, setZammadTokenInput] = useState('');
   const [tokenSaveMsg, setTokenSaveMsg] = useState('');
+  const [copiedCode, setCopiedCode] = useState('');
 
   // Load user session from localStorage on mount
   useEffect(() => {
@@ -264,7 +265,19 @@ export default function ComptesPage() {
             {userTickets.map((t) => (
               <div key={t.id} className="glass-card p-6 rounded-3xl border border-slate-800 space-y-4">
                 <div className="flex items-center justify-between border-b border-slate-800 pb-3 text-xs">
-                  <span className="font-mono font-bold text-emerald-400">{t.trackingCode}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono font-bold text-emerald-400">{t.trackingCode}</span>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(t.trackingCode);
+                        setCopiedCode(t.trackingCode);
+                        setTimeout(() => setCopiedCode(''), 2000);
+                      }}
+                      className="px-2 py-0.5 text-[10px] font-mono font-bold rounded-lg border border-slate-700 bg-slate-800 text-slate-200 hover:text-white hover:border-emerald-500 transition-all cursor-pointer"
+                    >
+                      {copiedCode === t.trackingCode ? '✓ Copié !' : 'Copier'}
+                    </button>
+                  </div>
                   <span className={`px-2.5 py-0.5 rounded-full font-bold text-[10px] ${
                     t.status === 'paid' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300'
                   }`}>

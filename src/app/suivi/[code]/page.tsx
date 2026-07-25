@@ -28,6 +28,7 @@ export default function SuiviDetailPage() {
   const [fileName, setFileName] = useState('');
   const [uploadMsg, setUploadMsg] = useState('');
   const [uploadLoading, setUploadLoading] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (!code) return;
@@ -177,6 +178,16 @@ export default function SuiviDetailPage() {
               <span className="text-2xl sm:text-3xl font-extrabold font-mono text-emerald-400 tracking-wider">
                 {ticket.trackingCode}
               </span>
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(ticket.trackingCode);
+                  setCopied(true);
+                  setTimeout(() => setCopied(false), 2000);
+                }}
+                className="inline-flex items-center gap-1 px-3 py-1 text-xs font-mono font-bold rounded-lg border border-slate-700 bg-slate-800 text-slate-200 hover:text-white hover:border-emerald-500 transition-all cursor-pointer"
+              >
+                {copied ? '✓ Copié !' : 'Copier'}
+              </button>
               <span className={`px-3 py-1 text-xs font-bold rounded-full ${
                 isPaid ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
               }`}>

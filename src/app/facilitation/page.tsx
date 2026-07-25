@@ -91,6 +91,7 @@ export default function FacilitationPage() {
   const [error, setError] = useState('');
   const [createdTicketCode, setCreatedTicketCode] = useState('');
   const [ussdNoticeSent, setUssdNoticeSent] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const handleDemarcheSelect = (demarche: AdministrativeDemarche) => {
     setSelectedDemarche(demarche);
@@ -439,7 +440,19 @@ export default function FacilitationPage() {
 
             <div className="space-y-2">
               <span className="text-xs font-bold text-emerald-400 uppercase tracking-widest">Dossier Enregistré & Transmis</span>
-              <h2 className="text-2xl font-extrabold text-white">Ticket N° {createdTicketCode}</h2>
+              <div className="flex items-center justify-center gap-3">
+                <h2 className="text-2xl font-extrabold text-white">Ticket N° {createdTicketCode}</h2>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(createdTicketCode);
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000);
+                  }}
+                  className="px-3 py-1 text-xs font-mono font-bold rounded-lg border border-slate-700 bg-slate-800 text-slate-200 hover:text-white hover:border-emerald-500 transition-all cursor-pointer"
+                >
+                  {copied ? '✓ Copié !' : 'Copier'}
+                </button>
+              </div>
               <p className="text-xs text-slate-300 leading-relaxed">
                 Votre paiement Mobile Money a été initié et votre dossier de facilitation administrative a été réorienté vers nos agents.
               </p>
