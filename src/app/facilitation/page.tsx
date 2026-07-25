@@ -159,7 +159,7 @@ export default function FacilitationPage() {
           <div className="space-y-3 max-w-2xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold uppercase tracking-wider">
               <SparklesIcon className="w-4 h-4" />
-              <span>Sous-Application Dédiée O'LO Hub</span>
+              <span>Guichet Officiel de Facilitation Gabon</span>
             </div>
             <h1 className="text-3xl sm:text-5xl font-extrabold text-white">
               O'LO Hub <span className="text-emerald-400 font-black">Facilitation</span>

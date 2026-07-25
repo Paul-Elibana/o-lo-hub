@@ -9,13 +9,50 @@ import {
   MessageSquareIcon,
   CreditCardIcon,
   BuildingIcon,
-  ShieldIcon
+  ShieldIcon,
+  PhoneIcon,
+  SparklesIcon
 } from './Icons';
+
+interface NavigationLink {
+  label: string;
+  href: string;
+  icon: React.ReactNode;
+  isHighlighted?: boolean;
+}
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchModalOpen, setSearchModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+
+  const navigationLinks: NavigationLink[] = [
+    {
+      label: "Accueil",
+      href: "/",
+      icon: <BuildingIcon className="w-4 h-4 text-emerald-400" />
+    },
+    {
+      label: "Catalogue des Hubs",
+      href: "/hubs",
+      icon: <SparklesIcon className="w-4 h-4 text-amber-400" />
+    },
+    {
+      label: "Vision Ogooué Labs",
+      href: "/vision",
+      icon: <ShieldIcon className="w-4 h-4 text-emerald-400" />
+    },
+    {
+      label: "Assistance & Support",
+      href: "/support",
+      icon: <MessageSquareIcon className="w-4 h-4 text-emerald-400" />
+    },
+    {
+      label: "Mon Compte",
+      href: "/comptes",
+      icon: <PhoneIcon className="w-4 h-4 text-emerald-400" />
+    }
+  ];
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,11 +65,11 @@ export function Navbar() {
     <>
       <header className="sticky top-0 z-50 backdrop-blur-xl bg-slate-900/90 border-b border-slate-800 shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20 gap-4">
+          <div className="flex items-center justify-between h-20 gap-6">
             
-            {/* Logo Brand: O'LO Hub Portail Principal */}
+            {/* Logo Brand: O'LO Hub Portail Numérique Ogooué Labs */}
             <Link href="/" className="flex items-center gap-3 group shrink-0">
-              <div className="relative w-11 h-11 rounded-2xl overflow-hidden border border-slate-700 bg-slate-950 shadow-md group-hover:scale-105 transition-all duration-300 flex items-center justify-center p-1.5">
+              <div className="relative w-11 h-11 rounded-xl overflow-hidden border border-slate-700 bg-slate-950 shadow-md group-hover:scale-105 transition-all duration-300 flex items-center justify-center p-1.5">
                 <Image
                   src="/images/logo_cropped.svg"
                   alt="O'LO Hub Logo"
@@ -46,98 +83,58 @@ export function Navbar() {
                   O'LO Hub <span className="text-emerald-400 font-black">Gabon</span>
                 </span>
                 <span className="block text-[10px] font-bold tracking-widest text-slate-400 uppercase">
-                  Portail Principal
+                  Portail Ogooué Labs
                 </span>
               </div>
             </Link>
 
             {/* Desktop Navigation Links */}
-            <nav className="hidden lg:flex items-center justify-center gap-2.5 flex-1" aria-label="Navigation principale">
-              
-              {/* O'LO Hub Facilitation Prominent Link */}
-              <Link
-                href="/facilitation"
-                className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-extrabold uppercase tracking-wider rounded-full border border-emerald-500/40 bg-emerald-950/60 text-emerald-300 hover:bg-emerald-900/60 transition-all shadow-sm transform hover:scale-105"
-              >
-                <ShieldIcon className="w-3.5 h-3.5 text-emerald-400" />
-                <span>O'LO Hub Facilitation</span>
-              </Link>
+            <nav className="hidden lg:flex items-center justify-center gap-4 flex-1 px-4" aria-label="Navigation principale">
+              {navigationLinks.map((link, index) => (
+                <React.Fragment key={link.label}>
+                  <Link
+                    href={link.href}
+                    className={`inline-flex items-center gap-2 px-4 py-2.5 text-xs font-bold uppercase tracking-wider rounded-xl transition-all shadow-sm ${
+                      link.href === '/comptes'
+                        ? 'border border-emerald-500/30 bg-slate-800 text-emerald-400 hover:bg-emerald-500/10 hover:border-emerald-500'
+                        : 'border border-slate-700 bg-slate-800 text-slate-100 hover:bg-slate-700 hover:border-emerald-500'
+                    }`}
+                  >
+                    {link.icon}
+                    <span>{link.label}</span>
+                  </Link>
 
-              {/* Hub Selection Dropdown */}
-              <div className="relative group">
-                <button
-                  className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-full border border-slate-700 bg-slate-800 text-slate-100 hover:bg-slate-700 hover:border-emerald-500 transition-all shadow-sm"
-                >
-                  <BuildingIcon className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Nos Hubs & Services</span>
-                  <svg className="w-3 h-3 text-slate-400 group-hover:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-
-                <div className="invisible absolute left-0 top-full w-72 pt-2 opacity-0 -translate-y-2 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 z-50">
-                  <div className="bg-slate-900 border border-slate-700 rounded-2xl p-3 shadow-2xl space-y-1 text-xs">
-                    <Link href="/facilitation" className="block px-3 py-2.5 rounded-xl font-bold text-white hover:bg-emerald-500/10 hover:text-emerald-400">
-                      🛡️ O'LO Hub Facilitation Administrative
-                      <span className="block text-[10px] text-slate-400 font-normal">ANPI, DGI, CNSS, Légalisation</span>
-                    </Link>
-                    <Link href="/nouveau-ticket?hub=entreprise" className="block px-3 py-2.5 rounded-xl font-bold text-white hover:bg-emerald-500/10 hover:text-emerald-400">
-                      🏢 Hub Entreprises & IT
-                      <span className="block text-[10px] text-slate-400 font-normal">SARL, NIF, conseil numérique</span>
-                    </Link>
-                    <Link href="/nouveau-ticket?hub=travail" className="block px-3 py-2.5 rounded-xl font-bold text-white hover:bg-emerald-500/10 hover:text-emerald-400">
-                      💼 Hub Travail & Emploi
-                      <span className="block text-[10px] text-slate-400 font-normal">Contrats & cotisations CNSS</span>
-                    </Link>
-                  </div>
-                </div>
-              </div>
-
-              <Link
-                href="/nouveau-ticket"
-                className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-full border border-slate-700 bg-slate-800 text-slate-100 hover:bg-slate-700 hover:border-emerald-500 transition-all shadow-sm"
-              >
-                <TicketIcon className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Nouveau Ticket</span>
-              </Link>
-
-              <Link
-                href="/suivi"
-                className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-full border border-slate-700 bg-slate-800 text-slate-100 hover:bg-slate-700 hover:border-emerald-500 transition-all shadow-sm"
-              >
-                <SearchIcon className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Suivre un Dossier</span>
-              </Link>
-
-              <Link
-                href="/support"
-                className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-full border border-slate-700 bg-slate-800 text-slate-100 hover:bg-slate-700 hover:border-emerald-500 transition-all shadow-sm"
-              >
-                <MessageSquareIcon className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Assistance Client</span>
-              </Link>
-
+                  {/* Add vertical separator between navigation sections */}
+                  {index < navigationLinks.length - 1 && (index === 0 || index === 2) && (
+                    <div
+                      role="separator"
+                      aria-orientation="vertical"
+                      className="bg-slate-800/90 my-auto h-5 w-px shrink-0"
+                    />
+                  )}
+                </React.Fragment>
+              ))}
             </nav>
 
             {/* Right Controls */}
-            <div className="flex items-center gap-3 shrink-0">
+            <div className="flex items-center gap-3.5 shrink-0">
               
-              {/* Search Toggle Button */}
+              {/* Search Toggle Square Button */}
               <button
                 onClick={() => setSearchModalOpen(true)}
-                className="p-2.5 rounded-full border border-slate-700 bg-slate-800 text-slate-200 hover:text-emerald-400 hover:border-emerald-500 transition-all shadow-sm"
+                className="p-2.5 rounded-xl border border-slate-700 bg-slate-800 text-slate-200 hover:text-emerald-400 hover:border-emerald-500 transition-all shadow-sm"
                 aria-label="Rechercher un dossier"
               >
                 <SearchIcon className="w-4 h-4" />
               </button>
 
-              {/* Primary Action Button */}
+              {/* Primary Action Square Button: Hub de Facilitation Actif */}
               <Link
                 href="/facilitation"
-                className="hidden sm:inline-flex items-center gap-2 px-5 py-2.5 text-xs font-extrabold uppercase tracking-wider text-white bg-emerald-600 hover:bg-emerald-500 rounded-full shadow-lg shadow-emerald-600/20 transition-all transform hover:scale-105"
+                className="hidden sm:inline-flex items-center gap-2 px-5 py-2.5 text-xs font-extrabold uppercase tracking-wider text-white bg-emerald-600 hover:bg-emerald-500 rounded-xl shadow-lg shadow-emerald-600/20 transition-all transform hover:scale-105"
               >
                 <ShieldIcon className="w-4 h-4" />
-                <span>Lancer une Facilitation</span>
+                <span>Hub Facilitation</span>
               </Link>
 
               {/* Mobile Menu Button */}
@@ -161,34 +158,32 @@ export function Navbar() {
 
         {/* Mobile menu overlay */}
         {mobileMenuOpen && (
-          <div className="lg:hidden bg-slate-900 border-b border-slate-800 px-4 pt-2 pb-6 space-y-3">
+          <div className="lg:hidden bg-slate-900 border-b border-slate-800 px-4 pt-2 pb-6 space-y-2">
+            {navigationLinks.map((link, index) => (
+              <React.Fragment key={link.label}>
+                <Link
+                  href={link.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block px-3 py-2.5 rounded-xl text-sm font-bold text-slate-100 hover:bg-slate-800"
+                >
+                  {link.label}
+                </Link>
+
+                {index < navigationLinks.length - 1 && (index === 0 || index === 2) && (
+                  <div
+                    role="separator"
+                    aria-orientation="horizontal"
+                    className="bg-slate-800/80 -mx-1 my-1.5 h-px w-full"
+                  />
+                )}
+              </React.Fragment>
+            ))}
             <Link
               href="/facilitation"
               onClick={() => setMobileMenuOpen(false)}
-              className="block px-3 py-2.5 rounded-lg text-sm font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30"
+              className="block px-3 py-2.5 rounded-xl text-sm font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 mt-2"
             >
-              🛡️ O'LO Hub Facilitation Administrative
-            </Link>
-            <Link
-              href="/nouveau-ticket"
-              onClick={() => setMobileMenuOpen(false)}
-              className="block px-3 py-2 rounded-lg text-sm font-bold text-slate-100 hover:bg-slate-800"
-            >
-              Nouveau Ticket
-            </Link>
-            <Link
-              href="/suivi"
-              onClick={() => setMobileMenuOpen(false)}
-              className="block px-3 py-2 rounded-lg text-sm font-bold text-slate-100 hover:bg-slate-800"
-            >
-              Suivre un Dossier
-            </Link>
-            <Link
-              href="/support"
-              onClick={() => setMobileMenuOpen(false)}
-              className="block px-3 py-2 rounded-lg text-sm font-bold text-slate-100 hover:bg-slate-800"
-            >
-              Assistance Client
+              Lancer une Facilitation
             </Link>
           </div>
         )}
@@ -210,11 +205,11 @@ export function Navbar() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Entrez votre code de ticket (ex: OLO-782910)..."
-                className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-4 py-3 text-sm font-mono text-white focus:outline-none focus:border-emerald-500"
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm font-mono text-white focus:outline-none focus:border-emerald-500"
               />
               <button
                 type="submit"
-                className="w-full py-3 rounded-2xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 transition-colors"
+                className="w-full py-3 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 transition-colors"
               >
                 Rechercher le Ticket
               </button>

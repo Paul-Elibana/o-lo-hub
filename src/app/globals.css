@@ -1,115 +1,107 @@
 @import "tailwindcss";
 
 @layer base {
-  body {
-    @apply bg-slate-900 text-slate-100 font-sans antialiased selection:bg-emerald-700 selection:text-white;
-    background-color: #0f172a;
-    background-image: 
-      radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.05) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, rgba(13, 148, 136, 0.05) 0px, transparent 50%);
-    background-attachment: fixed;
+  :root {
+    --background: #090d16;
+    --foreground: #f8fafc;
+    --card: #111827;
+    --card-foreground: #f8fafc;
+    --popover: #111827;
+    --popover-foreground: #f8fafc;
+    --primary: #059669;
+    --primary-foreground: #ffffff;
+    --secondary: #1e293b;
+    --secondary-foreground: #f8fafc;
+    --muted: #1e293b;
+    --muted-foreground: #94a3b8;
+    --accent: #d97706;
+    --accent-foreground: #ffffff;
+    --destructive: #ef4444;
+    --destructive-foreground: #ffffff;
+    --border: #1e293b;
+    --input: #1e293b;
+    --ring: #10b981;
   }
 }
 
-/* Eye-Friendly Muted Dark Cards */
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif);
+  overflow-x: hidden;
+}
+
+/* Glassmorphism & Card elevation styling */
 .glass-card {
-  background: rgba(30, 41, 59, 0.95);
+  background: rgba(17, 24, 39, 0.85);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid #334155;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
-  will-change: transform, box-shadow, border-color;
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  transform: translateZ(0);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
 }
 
-.glass-card-hover:hover {
+.glass-card:hover {
   transform: translate3d(0, -4px, 0);
-  border-color: #059669;
-  box-shadow: 0 16px 32px -8px rgba(5, 150, 105, 0.25);
+  border-color: rgba(16, 185, 129, 0.3);
+  box-shadow: 0 20px 40px -15px rgba(16, 185, 129, 0.15);
 }
 
-/* Fluid Button Hover Animations */
-button, a {
-  will-change: transform, opacity;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* Anime-Sama Hero Inspired Animations */
-@keyframes kenburnsZoom {
+/* Hero Ken-Burns background zoom effect */
+@keyframes kenburns {
   0% {
-    transform: scale(1);
+    transform: scale(1) translate3d(0, 0, 0);
   }
   50% {
-    transform: scale(1.08);
+    transform: scale(1.08) translate3d(0, 0, 0);
   }
   100% {
-    transform: scale(1);
+    transform: scale(1) translate3d(0, 0, 0);
   }
 }
 
 .animate-kenburns {
-  animation: kenburnsZoom 16s ease-in-out infinite alternate;
+  animation: kenburns 25s ease-in-out infinite alternate;
   will-change: transform;
 }
 
-@keyframes animeSamaHeroFadeIn {
-  0% {
+/* Glow line accent */
+.hero-glow-accent {
+  background: linear-gradient(90deg, #059669 0%, #10b981 50%, #f59e0b 100%);
+  height: 3px;
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.6);
+}
+
+/* Staggered entrance animation */
+@keyframes heroSlideUp {
+  from {
     opacity: 0;
-    transform: translateY(24px) scale(0.98);
+    transform: translate3d(0, 24px, 0);
   }
-  100% {
+  to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translate3d(0, 0, 0);
   }
 }
 
 .hero-animate-in {
-  animation: animeSamaHeroFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  will-change: transform, opacity;
+  animation: heroSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-@keyframes heroGlowPulse {
-  0%, 100% {
-    opacity: 0.6;
-    filter: drop-shadow(0 0 12px rgba(16, 185, 129, 0.4));
-  }
-  50% {
-    opacity: 1;
-    filter: drop-shadow(0 0 24px rgba(16, 185, 129, 0.8));
-  }
-}
-
-.hero-glow-accent {
-  animation: heroGlowPulse 4s ease-in-out infinite;
-}
-
-@keyframes splashProgress {
-  0% {
-    width: 0%;
-    margin-left: 0%;
-  }
-  50% {
-    width: 75%;
-    margin-left: 12.5%;
-  }
-  100% {
-    width: 100%;
-    margin-left: 0%;
-  }
-}
-
-/* Custom scrollbar */
+/* Custom scrollbars */
 ::-webkit-scrollbar {
   width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0f172a;
+  background: #090d16;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #334155;
+  background: #1e293b;
   border-radius: 4px;
 }
 
