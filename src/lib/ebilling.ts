@@ -1,8 +1,9 @@
 /**
  * Client d'intégration eBilling (DIGITECH AFRICA)
- * Conforme au Guide d'Intégration v1 (Pages 4, 8, 9 & 10 - Section 4.4.2 USSD Push)
- * - LAB API: https://lab.billing-easy.net/api/v1/merchant/e_bills.json
- * - USSD Push: POST https://lab.billing-easy.net/api/v1/merchant/e_bills/{bill_id}/ussd_push
+ * Mode Production & Fallback de Test Sécurisé
+ * - Username PROD: ogoouelabs
+ * - Key PROD: 17c6f141-0478-48d8-9e56-198c5e79ef45
+ * - PROD API: https://billing-easy.net/api/v1/merchant/e_bills.json
  */
 
 export interface CreateBillParams {
@@ -25,11 +26,11 @@ export interface EBillingResponse {
 }
 
 export async function createEBillingInvoice(params: CreateBillParams): Promise<EBillingResponse> {
-  const username = process.env.EBILLING_USERNAME || 'ogoouelabs_test';
-  const sharedKey = process.env.EBILLING_SHARED_KEY || '22887749-dbf3-4f6d-b3ff-02ab7d61307b';
-  const apiUrl = process.env.EBILLING_API_URL || 'https://lab.billing-easy.net/api/v1/merchant/e_bills.json';
-  const basePaymentUrl = process.env.EBILLING_PAYMENT_URL || 'https://test.billing-easy.net';
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  const username = process.env.EBILLING_USERNAME || 'ogoouelabs';
+  const sharedKey = process.env.EBILLING_SHARED_KEY || '17c6f141-0478-48d8-9e56-198c5e79ef45';
+  const apiUrl = process.env.EBILLING_API_URL || 'https://billing-easy.net/api/v1/merchant/e_bills.json';
+  const basePaymentUrl = process.env.EBILLING_PAYMENT_URL || 'https://billing-easy.net';
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://olodjango.vercel.app';
 
   // Format phone number for Gabon standard (077XXXXXX or 066XXXXXX)
   let phone = params.clientPhone.replace(/\s+/g, '');
