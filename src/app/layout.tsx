@@ -6,9 +6,14 @@ import { ZammadWidget } from '@/components/ZammadWidget';
 import { SplashScreen } from '@/components/SplashScreen';
 
 export const metadata: Metadata = {
-  title: "O'LO Hub Gabon | Facilitation Administrative, eBilling & Support Zammad",
-  description: "Plateforme digitale numéro 1 au Gabon pour vos démarches ANPI, DGI, CNSS et légalisation de documents. Paiement Mobile Money eBilling et suivi en temps réel.",
-  keywords: ["O'LO Hub", "Gabon", "ANPI", "DGI", "CNSS", "eBilling", "Airtel Money", "Moov Money", "Zammad", "Facilitation Administrative"],
+  title: "O'LO Hub Gabon | Portail des Solutions Numériques Ogooué Labs",
+  description: "Plateforme digitale numéro 1 au Gabon pour l'écosystème Ogooué Labs. Hub de Facilitation Administrative (ANPI, DGI, CNSS, Légalisation) et paiement Mobile Money.",
+  keywords: ["O'LO Hub", "Gabon", "Ogooué Labs", "ANPI", "DGI", "CNSS", "eBilling", "Airtel Money", "Moov Money", "Zammad", "Facilitation Administrative"],
+  icons: {
+    icon: '/images/olo_icon_cropped.svg',
+    shortcut: '/images/olo_icon_cropped.svg',
+    apple: '/images/olo_icon_cropped.svg',
+  },
 };
 
 export default function RootLayout({
@@ -19,6 +24,9 @@ export default function RootLayout({
   return (
     <html lang="fr" className="scroll-smooth">
       <head>
+        <link rel="icon" type="image/svg+xml" href="/images/olo_icon_cropped.svg" />
+        <link rel="shortcut icon" href="/images/olo_icon_cropped.svg" />
+        <link rel="apple-touch-icon" href="/images/olo_icon_cropped.svg" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
