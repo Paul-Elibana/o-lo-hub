@@ -1,19 +1,15 @@
 import { NextResponse } from 'next/server';
 import {
-  getAllTickets,
-  getTicketByCode,
-  saveTicket,
-  generateUniqueTrackingCode,
-  SERVICE_PRICES,
-  CITY_PRICES,
-  URGENCY_PRICES,
+  getAllTicketsAsync,
+  createTicketAsync,
+  generateTrackingCode,
   Ticket
 } from '@/lib/tickets';
 import { createEBillingInvoice } from '@/lib/ebilling';
 import { createZammadTicket } from '@/lib/zammad';
 
 export async function GET() {
-  const tickets = getAllTickets();
+  const tickets = await getAllTicketsAsync();
   return NextResponse.json({ success: true, tickets });
 }
 
@@ -26,29 +22,23 @@ export async function POST(request: Request) {
       clientPhone,
       service,
       description,
-      city,
+      city = 'Libreville',
       urgency = 'standard',
-      payNow = false
+      payNow = false,
+      overridePrice
     } = body;
 
-    if (!clientName || !clientEmail || !clientPhone || !service || !city) {
-      return NextResponse.json({ error: 'Champs obligatoires manquants' }, { status: 400 });
+    if (!clientName || !clientEmail || !clientPhone || !service) {
+      return NextResponse.json({ error: 'Champs obligatoires manquants (Nom, Email, Téléphone, Service)' }, { status: 400 });
     }
 
-    const basePrice = SERVICE_PRICES[service] || 150000;
-    const cityPrice = CITY_PRICES[city] || 0;
-    const urgencyPrice = URGENCY_PRICES[urgency] || 0;
-    const totalPrice = basePrice + cityPrice + urgencyPrice;
+    const totalPrice = Number(overridePrice) || 25000;
+    const trackingCode = generateTrackingCode();
 
-    const trackingCode = generateUniqueTrackingCode();
+    const initialStatus = 'pending_payment';
+    const updateText = 'Dossier créé. Redirection vers le paiement Mobile Money (eBilling)...';
 
-    const initialStatus = payNow ? 'pending_payment' : 'pending_payment';
-    const updateText = payNow
-      ? 'Ticket créé. Redirection vers le paiement Mobile Money (eBilling)...'
-      : 'Ticket créé. En attente de règlement.';
-
-    const newTicket: Ticket = {
-      id: `ticket-${Date.now()}`,
+    const newTicketData: Omit<Ticket, 'id' | 'createdAt' | 'updatedAt'> = {
       trackingCode,
       clientName,
       clientEmail,
@@ -59,12 +49,10 @@ export async function POST(request: Request) {
       urgency,
       price: totalPrice,
       status: initialStatus,
-      paymentMethod: payNow ? 'eBilling Mobile Money' : 'Payer plus tard',
+      paymentMethod: 'Mobile Money (eBilling)',
       progress: 15,
       updateText,
-      documents: [],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      documents: []
     };
 
     // 1. Generate eBilling payment invoice
@@ -74,12 +62,12 @@ export async function POST(request: Request) {
       clientEmail,
       clientPhone,
       amount: totalPrice,
-      description: `Frais de dossier OLO Hub (${service}) pour ${clientName}`
+      description: `Frais de dossier OLO Hub (${service})`
     });
 
     if (ebillingRes.success && ebillingRes.billId && ebillingRes.paymentUrl) {
-      newTicket.ebillingBillId = ebillingRes.billId;
-      newTicket.ebillingPaymentUrl = ebillingRes.paymentUrl;
+      newTicketData.ebillingBillId = ebillingRes.billId;
+      newTicketData.ebillingPaymentUrl = ebillingRes.paymentUrl;
     }
 
     // 2. Synchronize ticket with Zammad Customer Support API
@@ -89,16 +77,16 @@ export async function POST(request: Request) {
       customerName: clientName,
       customerPhone: clientPhone,
       service,
-      body: `Ville: ${city}\nUrgence: ${urgency}\nMontant: ${totalPrice} FCFA\nDescription: ${description || 'Aucune'}`,
+      body: `Ville: ${city}\nMontant: ${totalPrice} FCFA\nDescription: ${description || 'Aucune'}`,
       trackingCode
     });
 
     if (zammadRes.success && zammadRes.zammadTicketId) {
-      newTicket.zammadTicketId = zammadRes.zammadTicketId;
-      newTicket.zammadTicketNumber = zammadRes.zammadTicketNumber;
+      newTicketData.zammadTicketId = zammadRes.zammadTicketId;
+      newTicketData.zammadTicketNumber = zammadRes.zammadTicketNumber;
     }
 
-    saveTicket(newTicket);
+    const newTicket = await createTicketAsync(newTicketData);
 
     return NextResponse.json({
       success: true,
