@@ -34,4 +34,8 @@ next-env.d.ts
 Thumbs.db
 *.log
 
-.vercel
+# Agent internal files & skills lock
+.agents/
+skills-lock.json
+.gemini/
+.tempmediaStorage/
