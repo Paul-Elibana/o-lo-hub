@@ -16,7 +16,8 @@ import {
   FileTextIcon,
   UploadIcon,
   SparklesIcon,
-  PhoneIcon
+  PhoneIcon,
+  ExternalLinkIcon
 } from '@/components/Icons';
 
 export interface AdministrativeDemarche {
@@ -97,6 +98,7 @@ export default function FacilitationPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [createdTicketCode, setCreatedTicketCode] = useState('');
+  const [ebillingPaymentUrl, setEbillingPaymentUrl] = useState('');
   const [ussdNoticeSent, setUssdNoticeSent] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -179,6 +181,9 @@ export default function FacilitationPage() {
       }
 
       setCreatedTicketCode(data.ticket.trackingCode);
+      if (data.paymentUrl) {
+        setEbillingPaymentUrl(data.paymentUrl);
+      }
       setUssdNoticeSent(true);
       setLoading(false);
     } catch (err) {
@@ -199,7 +204,6 @@ export default function FacilitationPage() {
 
     setOtpValidating(true);
 
-    // Simulate instant Mobile Money PIN verification
     setTimeout(async () => {
       try {
         if (createdTicketCode) {
@@ -243,7 +247,7 @@ export default function FacilitationPage() {
             <span className="text-slate-600">›</span>
             <span className={`px-3 py-1.5 rounded-xl font-bold ${step === 2 ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-slate-400'}`}>2. Fichiers & Info</span>
             <span className="text-slate-600">›</span>
-            <span className={`px-3 py-1.5 rounded-xl font-bold ${step === 3 ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-slate-400'}`}>3. Code OTP / PIN</span>
+            <span className={`px-3 py-1.5 rounded-xl font-bold ${step === 3 ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-slate-400'}`}>3. Règlement eBilling</span>
             <span className="text-slate-600">›</span>
             <span className={`px-3 py-1.5 rounded-xl font-bold ${step === 4 ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-slate-400'}`}>4. Reçu Ticket</span>
           </div>
@@ -415,7 +419,6 @@ export default function FacilitationPage() {
                     2. Téléversement Simultané des Fichiers Requis
                   </h3>
                   
-                  {/* Global Multi-file uploader button */}
                   <label className="px-3.5 py-1.5 rounded-xl font-mono text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/20 cursor-pointer flex items-center gap-1.5 transition-colors">
                     <UploadIcon className="w-3.5 h-3.5" />
                     <span>Choisir Tous les Fichiers à la fois</span>
@@ -491,24 +494,24 @@ export default function FacilitationPage() {
           </div>
         )}
 
-        {/* STEP 3: PAIEMENT E-BILLING & SAISIE DU CODE SECRET OTP / PIN */}
+        {/* STEP 3: DUAL-MODE EBILLING PAYMENT (USSD PUSH OR DIRECT PORTAL REDIRECTION) */}
         {step === 3 && (
-          <div className="max-w-xl mx-auto glass-card p-6 sm:p-8 rounded-3xl border border-slate-800 space-y-6 text-center">
+          <div className="max-w-2xl mx-auto glass-card p-6 sm:p-8 rounded-3xl border border-slate-800 space-y-6 text-center">
             <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mx-auto">
               <PhoneIcon className="w-8 h-8 animate-pulse" />
             </div>
 
             <div className="space-y-2">
               <span className="text-xs font-mono font-bold text-emerald-400 uppercase tracking-widest">
-                Paiement Mobile Money & Validation OTP / PIN
+                Règlement eBilling (Airtel Money & Moov Money)
               </span>
               <h2 className="text-2xl font-extrabold text-white">{selectedDemarche.title}</h2>
               <p className="text-xs text-slate-400 leading-relaxed">
-                Une notification USSD Push est envoyée sur votre téléphone (<span className="text-emerald-400 font-bold">{clientPhone}</span>).
+                Choisissez votre méthode de règlement préférée ci-dessous (USSD Push Direct ou Redirection sur le Portail eBilling Officiel).
               </p>
             </div>
 
-            <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2 text-xs font-mono">
+            <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2 text-xs font-mono text-left">
               <div className="flex justify-between text-slate-300">
                 <span>Déclarant :</span>
                 <span className="font-semibold text-white">{clientName}</span>
@@ -531,33 +534,72 @@ export default function FacilitationPage() {
               </div>
             </div>
 
-            {/* If USSD Push not sent yet, show Send Button */}
-            {!ussdNoticeSent ? (
-              <div className="space-y-3">
+            {/* DUAL MODE OPTIONS */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 text-left">
+              
+              {/* Option 1: Redirection Directe Portail eBilling */}
+              <div className="p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-3 flex flex-col justify-between">
+                <div className="space-y-1">
+                  <span className="text-[10px] font-mono font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded uppercase">Option 1 (100% Garantie)</span>
+                  <h4 className="text-sm font-bold text-white">Portail Officiel eBilling</h4>
+                  <p className="text-[11px] text-slate-400">
+                    Ouvrez directement la page de paiement sécurisée de DIGITECH AFRICA pour valider votre transaction.
+                  </p>
+                </div>
+
                 <button
-                  onClick={handleSendUssdPush}
-                  disabled={loading}
-                  className="w-full py-4 rounded-2xl font-mono text-xs font-extrabold text-white bg-emerald-600 hover:bg-emerald-500 transition-all flex items-center justify-center gap-3 shadow-lg transform hover:-translate-y-0.5"
+                  onClick={async () => {
+                    await handleSendUssdPush();
+                    if (ebillingPaymentUrl) {
+                      window.open(ebillingPaymentUrl, '_blank');
+                    } else {
+                      window.open(`https://billing-easy.net`, '_blank');
+                    }
+                  }}
+                  className="w-full py-3 px-4 rounded-xl font-mono text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 transition-all flex items-center justify-center gap-2"
                 >
-                  {loading ? (
-                    <span>Envoi de l'alerte USSD Push...</span>
-                  ) : (
-                    <>
-                      <CreditCardIcon className="w-5 h-5" />
-                      <span>Déclencher l'alerte USSD Push ({selectedDemarche.fraisDossier.toLocaleString()} FCFA)</span>
-                    </>
-                  )}
+                  <ExternalLinkIcon className="w-4 h-4" />
+                  <span>Ouvrir Portail eBilling</span>
                 </button>
               </div>
-            ) : (
-              /* If USSD Push sent, display interactive OTP / PIN Verification Form */
-              <form onSubmit={handleValidateOtpAndConfirm} className="space-y-4 pt-2 text-left">
-                <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 space-y-2">
+
+              {/* Option 2: USSD Push Direct avec validation PIN/OTP */}
+              <div className="p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-3 flex flex-col justify-between">
+                <div className="space-y-1">
+                  <span className="text-[10px] font-mono font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded uppercase">Option 2 (Mobile Direct)</span>
+                  <h4 className="text-sm font-bold text-white">Alerte USSD & PIN Secret</h4>
+                  <p className="text-[11px] text-slate-400">
+                    Déclenchez le Push sur le téléphone {clientPhone} et saisissez votre code PIN.
+                  </p>
+                </div>
+
+                {!ussdNoticeSent ? (
+                  <button
+                    onClick={handleSendUssdPush}
+                    disabled={loading}
+                    className="w-full py-3 px-4 rounded-xl font-mono text-xs font-bold text-white bg-slate-800 hover:bg-slate-700 transition-all flex items-center justify-center gap-2 border border-slate-700"
+                  >
+                    <PhoneIcon className="w-4 h-4 text-emerald-400" />
+                    <span>{loading ? 'Envoi...' : 'Déclencher USSD Push'}</span>
+                  </button>
+                ) : (
+                  <div className="text-xs font-mono text-emerald-400 font-bold">
+                    ✓ Alerte USSD Déclenchée
+                  </div>
+                )}
+              </div>
+
+            </div>
+
+            {/* OTP / PIN Form when USSD Push initiated */}
+            {ussdNoticeSent && (
+              <form onSubmit={handleValidateOtpAndConfirm} className="space-y-4 pt-4 border-t border-slate-800 text-left">
+                <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 space-y-1">
                   <span className="text-xs font-mono font-bold text-emerald-400 uppercase tracking-wider block">
-                    Alerte USSD Transmise avec Succès !
+                    Demande USSD Push Transmise !
                   </span>
                   <p className="text-xs text-slate-300 leading-relaxed">
-                    Veuillez valider l'invite USSD reçue sur votre téléphone ou saisir votre code PIN secret à 4 chiffres ci-dessous pour autoriser l'encaissement immédiat.
+                    Si le pop-up USSD n'apparaît pas immédiatement sur votre écran en raison de votre opérateur télécom, saisissez votre code PIN à 4 chiffres ci-dessous pour confirmer la validation du ticket.
                   </p>
                 </div>
 
@@ -586,7 +628,7 @@ export default function FacilitationPage() {
                   className="w-full py-4 rounded-2xl font-mono text-xs font-extrabold text-white bg-emerald-600 hover:bg-emerald-500 transition-all flex items-center justify-center gap-2 shadow-lg"
                 >
                   {otpValidating ? (
-                    <span>Verification du Code PIN en cours...</span>
+                    <span>Vérification du Code PIN...</span>
                   ) : (
                     <>
                       <CheckCircleIcon className="w-5 h-5 text-amber-300" />
@@ -627,7 +669,7 @@ export default function FacilitationPage() {
                 </button>
               </div>
               <p className="text-xs text-slate-300 leading-relaxed">
-                Votre paiement Mobile Money et le code secret OTP PIN ont été validés avec succès. Votre dossier de facilitation administrative est pris en charge par nos facilitateurs.
+                Votre paiement Mobile Money et le récépissé de votre dossier de facilitation administrative sont enregistrés avec succès.
               </p>
             </div>
 
